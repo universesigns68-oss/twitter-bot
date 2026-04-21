@@ -2,7 +2,7 @@ name: twitter-bot
 
 on:
   schedule:
-    - cron: "0 * * * *"   # mỗi 1 giờ (UTC)
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -10,16 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: pip install tweepy
+      - run: pip install tweepy openai
 
       - name: Run bot
         env:
@@ -27,4 +24,5 @@ jobs:
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python bot.py
