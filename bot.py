@@ -1,14 +1,13 @@
 import os
 import random
 import tweepy
-from openai import OpenAI
 
-# ====== DEBUG (xoá sau khi chạy OK) ======
-print("KEY:", os.getenv("X_API_KEY"))
-print("TOKEN:", os.getenv("X_ACCESS_TOKEN"))
-print("AI:", os.getenv("OPENAI_API_KEY"))
+# ====== DEBUG (xóa sau khi ổn) ======
+print("KEY:", bool(os.getenv("X_API_KEY")))
+print("TOKEN:", bool(os.getenv("X_ACCESS_TOKEN")))
+print("AI:", bool(os.getenv("OPENAI_API_KEY")))
 
-# ====== X API ======
+# ====== KẾT NỐI X API ======
 client = tweepy.Client(
     consumer_key=os.getenv("X_API_KEY"),
     consumer_secret=os.getenv("X_API_SECRET"),
@@ -16,61 +15,38 @@ client = tweepy.Client(
     access_token_secret=os.getenv("X_ACCESS_SECRET"),
 )
 
-# ====== OPENAI ======
-ai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-zodiac = [
+# ====== DATA (fallback) ======
+ZODIAC = [
     "aries","taurus","gemini","cancer",
     "leo","virgo","libra","scorpio",
     "sagittarius","capricorn","aquarius","pisces"
 ]
 
-# ====== AI GENERATE ======
-def generate_ai_text():
-    try:
-        prompt = """
-Write ONE short viral horoscope sentence.
+MESSAGES = [
+    "trust the timing",
+    "something is coming",
+    "they still think about you",
+    "good news is near",
+    "you feel it for a reason",
+    "your intuition was right",
+    "a shift is happening",
+    "unexpected news arrives",
+    "they miss you quietly",
+    "wait a little longer"
+]
 
-Rules:
-- 3 to 6 words
-- lowercase only
-- no punctuation
-- emotional, mysterious, relatable
-- sounds like a sign from universe
-"""
+def generate_text():
+    """Không dùng AI để tiết kiệm chi phí. Có thể nâng cấp sau."""
+    return random.choice(MESSAGES)
 
-        res = ai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=20
-        )
-
-        text = res.choices[0].message.content.strip().lower()
-
-        # clean
-        text = text.replace(".", "").replace(",", "")
-
-        return text
-
-    except Exception as e:
-        print("AI error:", e)
-        return "trust the timing"
-
-# ====== POST ======
 def post_tweet():
     try:
-        sign = random.choice(zodiac)
-        msg = generate_ai_text()
-
-        tweet = f"{sign}, {msg}"
-
-        client.create_tweet(text=tweet)
-
-        print("✅ Posted:", tweet)
-
+        text = f"{random.choice(ZODIAC)}, {generate_text()}"
+        client.create_tweet(text=text)
+        print("✅ Posted:", text)
     except Exception as e:
         print("❌ Error:", e)
+        raise  # để Actions thấy lỗi (dễ debug)
 
-# ====== RUN ======
 if __name__ == "__main__":
     post_tweet()
